@@ -42,7 +42,10 @@ tableCltr.getRestaurantTables = async(req,res)=>{
     try{
         const restaurant_id = req.params.restaurantId
         console.log(restaurant_id)
-        const getTables = await Table.find({restaurantId:restaurant_id})
+        const page=Number(req.query.page)||'';
+        const pageSize=Number(req.query.pageSize)||'';
+        const skip=(page-1)*pageSize
+        const getTables = await Table.find({restaurantId:restaurant_id}).limit(page).skip(skip)
         if(getTables.length===0){
             return res.status(404).json({error:'tables not found'})
         }

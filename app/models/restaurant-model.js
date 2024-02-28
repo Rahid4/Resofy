@@ -15,6 +15,7 @@ const resSchema=new Schema({
     gstNo:String,
     licenseNumber:String,
     image:String,
+    rating:Number,
     timings: [{
         dayOfWeek: {
             type: String,

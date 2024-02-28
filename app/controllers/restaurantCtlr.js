@@ -20,20 +20,9 @@ restaurantCtlr.register = async (req, res) => {
         const restaurant = new Restaurant(req.body);
         restaurant.ownerId = req.user.id;
         restaurant.restaurantEmail = req.user.email;
-        //restaurant.image1 = req.files['image'][0].filename;
-        //restaurant.image2 = req.files['image'][1].filename
-        //restaurant.image = req.files['image'].map(file => file.filename);
-
-        //const imageFilenames = req.files['image'].map(file => file.filename);
-        //restaurant.image = imageFilenames.join(', '); // Concatenate filenames with a comma (you can use any separator you prefer)
         restaurant.image = req.files['image'][0].filename
-
-
         restaurant.licenseNumber = req.files['licenseNumber'][0].filename;
-
         await restaurant.save();
-
-
         res.status(201).json(restaurant);
     } catch (e) {
         console.error(e);
@@ -43,13 +32,19 @@ restaurantCtlr.register = async (req, res) => {
 
 restaurantCtlr.getAll = async (req, res) => {
     try {
-        const getAll = await Restaurant.find()
-        res.status(200).json(getAll)
-
+        let page = Number(req.query.page) || 1;
+        const pageSize = Number(req.query.pageSize) || '';
+        page = Math.max(page, 1)
+        const skip = (page - 1) * pageSize;
+        const getAll = await Restaurant.find({status:'approved'}).limit(pageSize).skip(skip);
+        console.log(getAll.length,'le')
+        res.status(200).json(getAll);
     } catch (e) {
-        res.status(500).json(e)
+        console.error(e);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 
 restaurantCtlr.updateRestaurant = async (req, res) => {
     const errors = validationResult(req);
@@ -185,7 +180,7 @@ restaurantCtlr.approvedRestaurant = async (req, res) => {
        auth: {
          user: process.env.GMAIL_USER,
          pass: process.env.GMAIL_PASSWORD,
-         // Use an "App Password" generated in your Gmail account settings
+         
        },
      });
  
@@ -304,16 +299,18 @@ restaurantCtlr.getOne = async(req,res)=>{
 
 restaurantCtlr.getBySearch = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 5;
-        const startIndex = parseInt(req.query.startIndex) || 0;
-        const searchTerm = req.query.searchTerm || '';
-
+        
+        
+        const searchTerm = req.query.searchTerm || ''
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 6
+        const skip = (page - 1) * pageSize
         const listings = await Restaurant.find({
             name: { $regex: searchTerm, $options: 'i' },
             status: 'approved'
         })
-        .limit(limit)
-        .skip(startIndex);
+        .limit(pageSize)
+        .skip(skip);
 
         return res.status(200).json(listings);
     } catch (e) {

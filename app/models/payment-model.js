@@ -29,7 +29,7 @@ const paymentSchema = new Schema({
         type : String,
         // required : true
     },
-    transaction_Id : {
+    transactionId : {
         type : String,
         // required : true
     }

@@ -72,7 +72,7 @@ app.post('/api/restaurantRegister', authenticateUser, authorizedUser(['restauran
 
 
 
-app.get('/api/getAll',authenticateUser,restaurantCtlr.getAll)
+app.get('/api/getAll',restaurantCtlr.getAll)
 app.get('/api/restaurant/:ownerId',authenticateUser,authorizedUser(['restaurantOwner','admin']),restaurantCtlr.getOne)
 
 
